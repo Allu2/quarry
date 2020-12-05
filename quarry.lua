@@ -74,6 +74,32 @@ function dropInChest()
 				end
 			end
 		end
+	else
+		turtle.turnLeft()
+	
+		local success, data = turtle.inspect()
+
+		if success then
+			if data.name == "minecraft:chest" then
+
+				out("Dropping items in chest")
+
+				for i=1, 16 do
+					turtle.select(i)
+
+					data = turtle.getItemDetail()
+
+					if data ~= nil and
+							(data.name == "minecraft:coal" and CHARCOALONLY == false) == false and
+							(data.damage == nil or data.name .. data.damage ~= "minecraft:coal1") then
+
+						turtle.drop()
+					end
+				end
+			end
+		end
+		
+		turtle.turnRight()
 	end
 	
 	turtle.turnRight()
