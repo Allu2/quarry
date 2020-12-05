@@ -15,11 +15,11 @@ function stackItems()
 			
 	for i=1, 16 do
 		local this = turtle.getItemDetail(i)
-		
+		local damage = this.damage or ""
 		if this ~= nil then
 			-- Slot is not empty
 		
-			local saved = m[this.name .. this.damage]
+			local saved = m[this.name .. damage]
 		
 			if saved ~= nil then
 				-- We've seen this item before in the inventory
@@ -37,12 +37,12 @@ function stackItems()
 					saved.slot = i
 					saved.count = ammount - saved.space
 					-- Update on table.
-					m[this.name .. this.damage] = saved
+					m[this.name .. damage] = saved
 			
 				elseif ammount == saved.space then
 					-- Just delete the entry
 					
-					m[this.name .. this.damage] = nil
+					m[this.name .. damage] = nil
 					
 				end
 				
@@ -53,7 +53,7 @@ function stackItems()
 			this.slot = i
 			this.space = turtle.getItemSpace(i)
 			
-			m[this.name .. this.damage] = this
+			m[this.name .. damage] = this
 			
 			end
 		end
