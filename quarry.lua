@@ -195,11 +195,38 @@ function moveH()
 		end
 
 		t.dig()
-		if not tryEmptyInventory() then return FULLINV end
+		if not tryEmptyInventory() then
+			if facingfw then
+				turtle.turnRight()
+			else
+				turtle.turnLeft()
+			end
+
+			facingfw = not facingfw
+			return FULLINV
+		end
 		t.digUp()
-		if not tryEmptyInventory() then return FULLINV end
+		if not tryEmptyInventory() then
+			if facingfw then
+				turtle.turnRight()
+			else
+				turtle.turnLeft()
+			end
+
+			facingfw = not facingfw
+			return FULLINV
+		end
 		t.digDown()
-		if not tryEmptyInventory() then return FULLINV end
+		if not tryEmptyInventory() then
+			if facingfw then
+				turtle.turnRight()
+			else
+				turtle.turnLeft()
+			end
+
+			facingfw = not facingfw
+			return FULLINV
+		end
 
 		if t.fw() == false then
 			return BLOCKEDMOV
