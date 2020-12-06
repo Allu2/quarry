@@ -44,28 +44,30 @@ end
 function out(s)
 
 	s2 = s .. " @ [" .. x .. ", " .. y .. ", " .. z .. "]"
-			
+
 	print(s2)
 	if USEMODEM then
 		rednet.broadcast(s2, "miningTurtle")
-	end  
+	end
 end
 
 function dropInChest()
-	turtle.turnLeft()
-	
-	local success, data = turtle.inspect()
-	
-	if success then
-		if data.name == "minecraft:chest" then
-		
+	local dropped = false
+	for i=1, 4 do
+		turtle.turnLeft()
+
+		if dropped then continue end
+
+		local success, data = turtle.inspect()
+
+		if success and data.name == "minecraft:chest" then
 			out("Dropping items in chest")
-			
+			dropped = true
 			for i=1, 16 do
 				turtle.select(i)
-				
+
 				data = turtle.getItemDetail()
-				
+
 				if data ~= nil and
 						(data.name == "minecraft:coal" and CHARCOALONLY == false) == false and
 						(data.damage == nil or data.name .. data.damage ~= "minecraft:coal1") then
@@ -74,36 +76,7 @@ function dropInChest()
 				end
 			end
 		end
-	else
-		turtle.turnLeft()
-	
-		local success, data = turtle.inspect()
-
-		if success then
-			if data.name == "minecraft:chest" then
-
-				out("Dropping items in chest")
-
-				for i=1, 16 do
-					turtle.select(i)
-
-					data = turtle.getItemDetail()
-
-					if data ~= nil and
-							(data.name == "minecraft:coal" and CHARCOALONLY == false) == false and
-							(data.damage == nil or data.name .. data.damage ~= "minecraft:coal1") then
-
-						turtle.drop()
-					end
-				end
-			end
-		end
-		
-		turtle.turnRight()
 	end
-	
-	turtle.turnRight()
-	
 end
 
 function goDown()
@@ -113,7 +86,7 @@ function goDown()
 				return OUTOFFUEL
 			end
 		end
-	
+
 		if not turtle.down() then
 			turtle.up()
 			z = z+1
@@ -131,7 +104,7 @@ function refuel()
 	for i=1, 16 do
 		-- Only run on Charcoal
 		turtle.select(i)
-		
+
 		item = turtle.getItemDetail()
 		if item and
 				item.name == "minecraft:coal" and
@@ -140,33 +113,37 @@ function refuel()
 			return true
 		end
 	end
-	
+
 	return false
 end
 
-function moveH()
+function tryEmptyInventory()
 	if inv.isInventoryFull() then
 		out("Dropping thrash")
 		inv.dropThrash()
-		
+
 		if inv.isInventoryFull() then
 			out ("Stacking items")
 			inv.stackItems()
 		end
-		
+
 		if inv.isInventoryFull() then
 			out("Full inventory!")
-			return FULLINV  
+			return false
 		end
 	end
-	
+	return true
+end
+
+function moveH()
+	if not tryEmptyInventory() then return FULLINV end
 	if turtle.getFuelLevel() <= fuelNeededToGoBack() then
 		if not refuel() then
 			out("Out of fuel!")
 			return OUTOFFUEL
 		end
 	end
-	
+
 	if facingfw and y<max-1 then
 	-- Going one way
 		local dugFw = t.dig()
@@ -174,65 +151,76 @@ function moveH()
 			out("Hit bedrock, can't keep going")
 			return BLOCKEDMOV
 		end
+		if not tryEmptyInventory() then return FULLINV end
 		t.digUp()
+		if not tryEmptyInventory() then return FULLINV end
 		t.digDown()
-	
+		if not tryEmptyInventory() then return FULLINV end
+
 		if t.fw() == false then
 			return BLOCKEDMOV
 		end
-		
+
 		y = y+1
-	
+
 	elseif not facingfw and y>0 then
 	-- Going the other way
 		t.dig()
+		if not tryEmptyInventory() then return FULLINV end
 		t.digUp()
+		if not tryEmptyInventory() then return FULLINV end
 		t.digDown()
-		
+		if not tryEmptyInventory() then return FULLINV end
+
 		if t.fw() == false then
 			return BLOCKEDMOV
 		end
-		
+
 		y = y-1
-		
+
 	else
 		if x+1 >= max then
 			t.digUp()
+			if not tryEmptyInventory() then return FULLINV end
 			t.digDown()
+			if not tryEmptyInventory() then return FULLINV end
 			return LAYERCOMPLETE -- Done with this Y level
 		end
-		
+
 		-- If not done, turn around
 		if facingfw then
 			turtle.turnRight()
 		else
 			turtle.turnLeft()
 		end
-		
+
 		t.dig()
+		if not tryEmptyInventory() then return FULLINV end
 		t.digUp()
+		if not tryEmptyInventory() then return FULLINV end
 		t.digDown()
-		
+		if not tryEmptyInventory() then return FULLINV end
+
 		if t.fw() == false then
 			return BLOCKEDMOV
 		end
-		
+
 		x = x+1
-		
+
 		if facingfw then
 			turtle.turnRight()
 		else
 			turtle.turnLeft()
 		end
-		
+
 		facingfw = not facingfw
 	end
-	
+
 	return OK
 end
 
 function digLayer()
-	
+
 	local errorcode = OK
 
 	while errorcode == OK do
@@ -244,62 +232,62 @@ function digLayer()
 		end
 		errorcode = moveH()
 	end
-	
+
 	if errorcode == LAYERCOMPLETE then
 		return OK
 	end
-	
-	return errorcode  
+
+	return errorcode
 end
 
 function goToOrigin()
-	
+
 	if facingfw then
-		
+
 		turtle.turnLeft()
-		
+
 		t.fw(x)
-		
+
 		turtle.turnLeft()
-		
+
 		t.fw(y)
-		
+
 		turtle.turnRight()
 		turtle.turnRight()
-		
+
 	else
-		
+
 		turtle.turnRight()
-		
+
 		t.fw(x)
-		
+
 		turtle.turnLeft()
-		
+
 		t.fw(y)
-		
+
 		turtle.turnRight()
 		turtle.turnRight()
-		
+
 	end
-	
+
 	x = 0
 	y = 0
 	facingfw = true
-	
+
 end
 
 function goUp()
 
 	while z < 0 do
-		
+
 		t.up()
-		
+
 		z = z+1
-		
+
 	end
-	
+
 	goToOrigin()
-	
+
 end
 
 function mainloop()
@@ -307,18 +295,18 @@ function mainloop()
 	while true do
 
 		local errorcode = digLayer()
-	
+
 		if errorcode ~= OK then
 			goUp()
 			return errorcode
 		end
-		
+
 		goToOrigin()
-		
+
 		for i=1, 3 do
 			t.digDown()
 			success = t.down()
-		
+
 			if not success then
 				goUp()
 				return BLOCKEDMOV
@@ -343,7 +331,7 @@ while true do
 
 	local errorcode = mainloop()
 	dropInChest()
-	
+
 	if errorcode ~= FULLINV then
 		break
 	end
