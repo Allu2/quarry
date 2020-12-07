@@ -164,12 +164,6 @@ function moveH()
 			t.digDown()
 			return OK
 		end
-
-		if t.fw() == false then
-			return BLOCKEDMOV
-		end
-
-		digs = 0
 		y = y+1
 	elseif not facingfw and y>0 then
 		-- Going the other way.
@@ -185,12 +179,6 @@ function moveH()
 			t.digDown()
 			return OK
 		end
-
-		if t.fw() == false then
-			return BLOCKEDMOV
-		end
-
-		digs = 0
 		y = y-1
 	else
 		if x+1 >= max then
@@ -222,14 +210,14 @@ function moveH()
 			t.digDown()
 			return OK
 		end
-
-		if t.fw() == false then
-			return BLOCKEDMOV
-		end
-
 		x = x+1
-		digs = 0
+	end
 
+	if not t.fw() then
+		return BLOCKEDMOV
+	end
+	digs = 0
+	if turning then
 		if facingfw then
 			turtle.turnRight()
 		else
@@ -239,7 +227,7 @@ function moveH()
 		turning = false
 		facingfw = not facingfw
 	end
-
+	
 	return OK
 end
 
