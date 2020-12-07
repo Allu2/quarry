@@ -7,7 +7,7 @@ local trash = {
 	["minecraft:stone"] = true,
 	["minecraft:dirt"] = true,
 
-	// AOF Modpack trash
+	-- AOF Modpack trash
 	["wild_explorer:carbonite"] = true,
 	["wild_explorer:blunite"] = true,
 	["blockus:limestone"] = true,
