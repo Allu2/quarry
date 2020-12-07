@@ -20,6 +20,7 @@ local USRINTERRUPT = 6
 
 local CHARCOALONLY = false
 local USEMODEM = false
+local DEBUG = false
 
 
 -- Arguments
@@ -33,6 +34,8 @@ for i=1,#tArgs do
 				CHARCOALONLY = true
 			elseif ch == 'm' then
 				USEMODEM = true
+			elseif ch == 'd' then
+				DEBUG = true
 			else
 				write("Invalid flag '")
 				write(ch)
@@ -44,7 +47,16 @@ end
 
 
 function out(s)
+	s2 = s .. " @ [" .. x .. ", " .. y .. ", " .. z .. "]"
 
+	print(s2)
+	if USEMODEM then
+		rednet.broadcast(s2, "miningTurtle")
+	end
+end
+
+function outDebug(s)
+	if not DEBUG then return end
 	s2 = s .. " @ [" .. x .. ", " .. y .. ", " .. z .. "]"
 
 	print(s2)
@@ -151,6 +163,7 @@ function moveH()
 	digs = digs+1
 
 	if facingfw and y<max-1 then
+		outDebug("Traveling forward, digs: " .. digs)
 		-- Going one way
 		if digs == 0 then
 			if not t.dig() then
@@ -166,6 +179,7 @@ function moveH()
 		end
 		y = y+1
 	elseif not facingfw and y>0 then
+		outDebug("Traveling reverse, digs: " .. digs)
 		-- Going the other way.
 		if digs == 0 then
 			if not t.dig() then
@@ -181,6 +195,7 @@ function moveH()
 		end
 		y = y-1
 	else
+		outDebug("Handling a turn, digs: " .. digs)
 		if x+1 >= max then
 			if digs == 0 then
 				t.digUp()
@@ -227,7 +242,7 @@ function moveH()
 		turning = false
 		facingfw = not facingfw
 	end
-	
+
 	return OK
 end
 
@@ -243,6 +258,9 @@ function digLayer()
 			end
 		end
 		errorcode = moveH()
+		if DEBUG then
+			sleep(1)
+		end
 	end
 
 	if errorcode == LAYERCOMPLETE then
