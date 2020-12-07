@@ -7,6 +7,8 @@ local z = 0
 local max = 16
 local deep = 64
 local facingfw = true
+local turning = false
+local digs = 0
 
 local OK = 0
 local ERROR = 1
@@ -136,7 +138,9 @@ function tryEmptyInventory()
 end
 
 function moveH()
-	if not tryEmptyInventory() then return FULLINV end
+	if not tryEmptyInventory() then
+		return FULLINV
+	end
 	if turtle.getFuelLevel() <= fuelNeededToGoBack() then
 		if not refuel() then
 			out("Out of fuel!")
@@ -144,88 +148,79 @@ function moveH()
 		end
 	end
 
+	digs = digs+1
+
 	if facingfw and y<max-1 then
-	-- Going one way
-		local dugFw = t.dig()
-		if dugFw == false then
-			out("Hit bedrock, can't keep going")
-			return BLOCKEDMOV
+		-- Going one way
+		if digs == 0
+			if not t.dig() then
+				out("Hit bedrock, can't keep going")
+				return BLOCKEDMOV
+			else return OK end
+		elseif digs == 1 then
+			t.digUp()
+			return OK
+		elseif digs == 2 then
+			t.digDown()
+			return OK
 		end
-		if not tryEmptyInventory() then return FULLINV end
-		t.digUp()
-		if not tryEmptyInventory() then return FULLINV end
-		t.digDown()
-		if not tryEmptyInventory() then return FULLINV end
 
 		if t.fw() == false then
 			return BLOCKEDMOV
 		end
 
+		digs = 0
 		y = y+1
-
 	elseif not facingfw and y>0 then
-	-- Going the other way
-		t.dig()
-		if not tryEmptyInventory() then return FULLINV end
-		t.digUp()
-		if not tryEmptyInventory() then return FULLINV end
-		t.digDown()
-		if not tryEmptyInventory() then return FULLINV end
+		-- Going the other way.
+		if digs == 0
+			if not t.dig() then
+				out("Hit bedrock, can't keep going")
+				return BLOCKEDMOV
+			else return OK end
+		elseif digs == 1 then
+			t.digUp()
+			return OK
+		elseif digs == 2 then
+			t.digDown()
+			return OK
+		end
 
 		if t.fw() == false then
 			return BLOCKEDMOV
 		end
 
+		digs = 0
 		y = y-1
-
 	else
 		if x+1 >= max then
-			t.digUp()
-			if not tryEmptyInventory() then return FULLINV end
-			t.digDown()
-			if not tryEmptyInventory() then return FULLINV end
+			if digs == 0
+				t.digUp()
+				return OK
+			elseif digs == 1 then
+				t.digDown()
+				return OK
+			end
+
+			digs = 0
 			return LAYERCOMPLETE -- Done with this Y level
 		end
 
-		-- If not done, turn around
-		if facingfw then
-			turtle.turnRight()
-		else
-			turtle.turnLeft()
-		end
-
-		t.dig()
-		if not tryEmptyInventory() then
+		if digs == 0 then
 			if facingfw then
 				turtle.turnRight()
 			else
 				turtle.turnLeft()
 			end
-
-			facingfw = not facingfw
-			return FULLINV
-		end
-		t.digUp()
-		if not tryEmptyInventory() then
-			if facingfw then
-				turtle.turnRight()
-			else
-				turtle.turnLeft()
-			end
-
-			facingfw = not facingfw
-			return FULLINV
-		end
-		t.digDown()
-		if not tryEmptyInventory() then
-			if facingfw then
-				turtle.turnRight()
-			else
-				turtle.turnLeft()
-			end
-
-			facingfw = not facingfw
-			return FULLINV
+			turning = true
+			t.dig()
+			return OK
+		elseif digs == 1 then
+			t.digUp()
+			return OK
+		elseif digs == 2 then
+			t.digDown()
+			return OK
 		end
 
 		if t.fw() == false then
@@ -233,6 +228,7 @@ function moveH()
 		end
 
 		x = x+1
+		digs = 0
 
 		if facingfw then
 			turtle.turnRight()
@@ -240,6 +236,7 @@ function moveH()
 			turtle.turnLeft()
 		end
 
+		turning = false
 		facingfw = not facingfw
 	end
 
@@ -268,6 +265,14 @@ function digLayer()
 end
 
 function goToOrigin()
+
+	if turning then
+		if facingfw then
+			turtle.turnRight()
+		else
+			turtle.turnLeft()
+		end
+	end
 
 	if facingfw then
 
@@ -300,7 +305,7 @@ function goToOrigin()
 	x = 0
 	y = 0
 	facingfw = true
-
+	turning = false
 end
 
 function goUp()
