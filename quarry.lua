@@ -8,7 +8,7 @@ local max = 16
 local deep = 64
 local facingfw = true
 local turning = false
-local digs = 0
+local digs = -1
 
 local OK = 0
 local ERROR = 1
@@ -205,7 +205,7 @@ function moveH()
 				return OK
 			end
 
-			digs = 0
+			digs = -1
 			return LAYERCOMPLETE -- Done with this Y level
 		end
 
@@ -233,7 +233,7 @@ function moveH()
 	if not t.fw() then
 		return BLOCKEDMOV
 	end
-	digs = 0
+	digs = -1
 	if turning then
 		if facingfw then
 			outDebug("Turning right")
