@@ -110,6 +110,21 @@ function goDown()
 	end
 end
 
+function goDownToZ(zLevel)
+	while zLevel < z do
+		if turtle.getFuelLevel() <= fuelNeededToGoBack() then
+			if not refuel() then
+				return OUTOFFUEL
+			end
+		end
+
+		if not turtle.down() then
+			return
+		end
+		z = z-1
+	end
+end
+
 function fuelNeededToGoBack()
 	return -z + x + y + 2
 end
@@ -320,6 +335,8 @@ end
 
 function goUp()
 
+	goToOrigin()
+
 	while z < 0 do
 
 		t.up()
@@ -328,35 +345,46 @@ function goUp()
 
 	end
 
-	goToOrigin()
-
 end
 
 function mainloop()
 
-	while true do
+	if goDown() == OUTOFFUEL then
+		goUp()
+		return
+	end
 
+	while true do
 		local errorcode = digLayer()
+		local preZ = z
 
 		if errorcode ~= OK then
 			goUp()
-			return errorcode
-		end
-
-		goToOrigin()
-
-		for i=1, 3 do
-			t.digDown()
-			success = t.down()
-
-			if not success then
-				goUp()
-				return BLOCKEDMOV
+			if errorcode == FULLINV then
+				dropInChest()
+				if goDownToZ(preZ) == OUTOFFUEL then
+					goUp()
+					return
+				end
+			else
+				return
 			end
+		else
+			goToOrigin()
+			for i=1, 3 do
+				t.digDown()
+				if not t.down() then
+					break
+				end
 
-			z = z-1
-			out("Z: " .. z)
-
+				z = z-1
+				out("Z: " .. z)
+			end
+			-- We can't go down anymore
+			if preZ == z then
+				goUp()
+				break
+			end
 		end
 	end
 end
@@ -367,17 +395,7 @@ end
 
 out("\n\n\n-- WELCOME TO THE MINING TURTLE --\n\n")
 
-while true do
-
-	goDown()
-
-	local errorcode = mainloop()
-	dropInChest()
-
-	if errorcode ~= FULLINV then
-		break
-	end
-end
+mainloop()
 
 if USEMODEM then
 	rednet.close("right")
