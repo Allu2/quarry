@@ -152,7 +152,7 @@ function moveH()
 
 	if facingfw and y<max-1 then
 		-- Going one way
-		if digs == 0
+		if digs == 0 then
 			if not t.dig() then
 				out("Hit bedrock, can't keep going")
 				return BLOCKEDMOV
@@ -173,7 +173,7 @@ function moveH()
 		y = y+1
 	elseif not facingfw and y>0 then
 		-- Going the other way.
-		if digs == 0
+		if digs == 0 then
 			if not t.dig() then
 				out("Hit bedrock, can't keep going")
 				return BLOCKEDMOV
@@ -194,7 +194,7 @@ function moveH()
 		y = y-1
 	else
 		if x+1 >= max then
-			if digs == 0
+			if digs == 0 then
 				t.digUp()
 				return OK
 			elseif digs == 1 then
