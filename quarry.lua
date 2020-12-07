@@ -211,8 +211,10 @@ function moveH()
 
 		if digs == 0 then
 			if facingfw then
+				outDebug("Turning right")
 				turtle.turnRight()
 			else
+				outDebug("Turning left")
 				turtle.turnLeft()
 			end
 			turning = true
@@ -234,8 +236,10 @@ function moveH()
 	digs = 0
 	if turning then
 		if facingfw then
+			outDebug("Turning right")
 			turtle.turnRight()
 		else
+			outDebug("Turning left")
 			turtle.turnLeft()
 		end
 
