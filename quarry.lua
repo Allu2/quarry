@@ -278,7 +278,7 @@ function digLayer()
 		end
 		errorcode = moveH()
 		if DEBUG then
-			sleep(1)
+			sleep(0.25)
 		end
 	end
 
