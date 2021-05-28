@@ -6,6 +6,16 @@ local trash = {
 	["minecraft:gravel"] = true,
 	["minecraft:stone"] = true,
 	["minecraft:dirt"] = true,
+	
+	-- Enigmatica 6 trash
+	["create:weathered_limestone"] = true,
+	["create:gabbro"] = true,
+	["create:limestone"] = true,
+	["create:natural_scoria"] = true,
+	["astralsorcery:marble_raw"] = true,
+	["quark:jasper"] = true,
+	["quark:slate"] = true,
+		
 
 	-- AOF Modpack trash
 	["wild_explorer:carbonite"] = true,
