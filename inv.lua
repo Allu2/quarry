@@ -12,6 +12,7 @@ local trash = {
 	["create:gabbro"] = true,
 	["create:limestone"] = true,
 	["create:natural_scoria"] = true,
+	["create:scoria"] = true,
 	["astralsorcery:marble_raw"] = true,
 	["quark:jasper"] = true,
 	["quark:slate"] = true,
